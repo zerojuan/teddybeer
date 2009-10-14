@@ -6,6 +6,7 @@ import org.newdawn.slick.geom.Vector2f;
 import com.icecream.entity.Entity;
 import com.icecream.exception.MissingComponentException;
 import com.icecream.unit.IComponent;
+import com.icecream.util.ECollisionId;
 
 public class SpatialComponent implements IComponent{
 
@@ -18,8 +19,14 @@ public class SpatialComponent implements IComponent{
 	
 	protected Rectangle boundingBox;
 	
+	protected ECollisionId collisionId;
+	
 	public SpatialComponent(){
-		
+		this.collisionId = ECollisionId.GUI;
+	}
+	
+	public SpatialComponent(ECollisionId collisionId){
+		this.collisionId = collisionId;
 	}
 	
 	public Vector2f getPosition() {
@@ -35,9 +42,26 @@ public class SpatialComponent implements IComponent{
 	public void setVelocity(Vector2f velocity) {
 		this.velocity = velocity;
 	}
-	
+	public ECollisionId getCollisionId(){
+		return collisionId;
+	}
+	public void setCollisionId(ECollisionId collisionId){
+		this.collisionId = collisionId;
+	}
+	public Rectangle getBounds(){
+		return boundingBox;
+	}
+	public void setBounds(Rectangle rect){
+		this.boundingBox = rect;
+	}
 
-
+	/**
+	 * Called by the manager when I collided with another object
+	 * @param component The component this object collided with
+	 */
+	public void collidedWith(SpatialComponent component){
+		//FIXME: Add collision logic here
+	}
 
 	@Override
 	public void activate() throws MissingComponentException {
@@ -83,7 +107,6 @@ public class SpatialComponent implements IComponent{
 	public void update(int delta){
 		position.add(velocity);
 		velocity.scale(-1);
-	}
-	
+	}	
 
 }
