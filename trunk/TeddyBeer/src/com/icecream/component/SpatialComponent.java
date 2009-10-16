@@ -2,6 +2,7 @@ package com.icecream.component;
 
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
+import org.newdawn.slick.util.Log;
 
 import com.icecream.entity.Entity;
 import com.icecream.exception.MissingComponentException;
@@ -40,6 +41,7 @@ public class SpatialComponent implements IComponent{
 		return velocity;
 	}
 	public void setVelocity(Vector2f velocity) {
+		Log.info("Setting velocity" + velocity.toString());
 		this.velocity = velocity;
 	}
 	public ECollisionId getCollisionId(){
@@ -99,7 +101,7 @@ public class SpatialComponent implements IComponent{
 	@Override
 	public boolean validate() throws MissingComponentException {
 		if(entity == null){
-			return false;
+			throw new MissingComponentException();
 		}
 		return true;
 	}

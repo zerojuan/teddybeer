@@ -1,24 +1,27 @@
 package com.icecream.entity;
 
-import com.icecream.component.InputComponent;
 import com.icecream.component.RenderComponent;
 import com.icecream.component.SpatialComponent;
 import com.icecream.exception.MissingComponentException;
 import com.icecream.unit.IComponent;
 
-public class Player extends Entity implements IComponent{
+/**
+ * A sprite is an entity that doesn't have any input
+ * TODO: Create another name for this
+ * @author Julius
+ *
+ */
+public class Sprite extends Entity implements IComponent{
 
-	private boolean active;	
-	
-	//Components that a player must have
 	private SpatialComponent spatialComponent;
 	private RenderComponent renderComponent;
-	private InputComponent inputComponent;
 	
-	public Player(String id){
-		super(id);
+	private boolean active;
+	
+	public Sprite(String id) {
+		super(id);		
 	}
-
+	
 	@Override
 	public void activate() throws MissingComponentException {
 		if(this.validate()){
@@ -32,8 +35,6 @@ public class Player extends Entity implements IComponent{
 			spatialComponent = (SpatialComponent)component;
 		}else if(component instanceof RenderComponent){
 			renderComponent = (RenderComponent)component;
-		}else if(component instanceof InputComponent){
-			inputComponent = (InputComponent)component;
 		}
 		
 	}
@@ -57,8 +58,7 @@ public class Player extends Entity implements IComponent{
 	@Override
 	public boolean validate() throws MissingComponentException {		
 		return !((spatialComponent == null) || 
-				(renderComponent == null) || 
-				(inputComponent == null));
+				(renderComponent == null));				
 	}			
 
 }

@@ -34,8 +34,8 @@ public class TeddyBeerGame extends StateBasedGame implements IComponent{
 
 	@Override
 	public void initStatesList(GameContainer container) throws SlickException {
-		Log.setVerbose(false);
-		container.setShowFPS(false);
+		Log.setVerbose(true);
+		container.setShowFPS(true);
 		
 		this.getState(MENUSTATE).init(container, this);
 		this.getState(GAMEPLAYSTATE).init(container, this);
