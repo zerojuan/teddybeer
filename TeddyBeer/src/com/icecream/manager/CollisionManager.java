@@ -30,9 +30,18 @@ public class CollisionManager implements IManager, IUpdateable{
 	private HashMap<ECollisionId, List<IComponent>> spatialComponents;	
 	private Map<ECollisionId, ECollisionId> collisionMap;
 	
-	public CollisionManager(){
+	private static CollisionManager instance;
+	
+	private CollisionManager(){
 		spatialComponents = new HashMap<ECollisionId, List<IComponent>>();
 		collisionMap = new HashMap<ECollisionId, ECollisionId>();
+	}
+	
+	public static CollisionManager instance(){
+		if(instance == null){
+			instance = new CollisionManager();
+		}
+		return instance;
 	}
 	
 	
