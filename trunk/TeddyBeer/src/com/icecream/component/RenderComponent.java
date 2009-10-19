@@ -15,7 +15,7 @@ public class RenderComponent implements IComponent, IRenderable {
 
 	private boolean active;
 	
-	private SpatialComponent spatialComponent;
+	protected SpatialComponent spatialComponent;
 	
 	private Entity entity;
 	/**
@@ -25,7 +25,29 @@ public class RenderComponent implements IComponent, IRenderable {
 	
 	private Image image;
 	
-	public RenderComponent(){		
+	/**
+	 * Creates a new Rendering component based on the parameters
+	 * @param spatialComponent the spatialComponent used to render it in the world
+	 * @param owner the owner of this component
+	 * @param layer the layer in which this graphics will be painted
+	 * @param image the image to draw
+	 */
+	public RenderComponent(SpatialComponent spatialComponent, Entity owner, int layer, Image image){
+		this.spatialComponent = spatialComponent;
+		this.entity = owner;
+		setLayer(layer);
+		this.image = image;
+	}
+	/**
+	 * Creates a new Rendering component based on the parameters
+	 * @param spatialComponent the spatialComponent used to render it in the world
+	 * @param owner the owner of this component
+	 * @param layer the layer in which this graphics will be painted	 
+	 */
+	public RenderComponent(SpatialComponent spatialComponent, Entity owner, int layer){
+		this.spatialComponent = spatialComponent;
+		this.entity = owner;
+		setLayer(layer);
 	}
 	
 	public Image getImage(){
@@ -72,9 +94,9 @@ public class RenderComponent implements IComponent, IRenderable {
 	}
 
 	@Override
-	public boolean isActive() {
+	public boolean isActive() {		
 		return active;
-	}
+	}	
 
 	@Override
 	public boolean validate() throws MissingComponentException {
