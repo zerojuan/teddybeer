@@ -1,5 +1,9 @@
 package com.icecream.game;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.newdawn.slick.Animation;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
@@ -7,6 +11,7 @@ import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
+import com.icecream.component.AnimationRenderComponent;
 import com.icecream.component.InputComponent;
 import com.icecream.component.RenderComponent;
 import com.icecream.component.SpatialComponent;
@@ -17,6 +22,8 @@ import com.icecream.factory.AssetFactory;
 import com.icecream.manager.InputManager;
 import com.icecream.manager.RenderingManager;
 import com.icecream.manager.SpatialManager;
+import com.icecream.util.EAnimType;
+import com.icecream.util.ECollisionId;
 import com.icecream.util.EImgType;
 
 public class GamePlayState extends BasicGameState{
@@ -44,44 +51,59 @@ public class GamePlayState extends BasicGameState{
 		running = new Animation(spriteSheet,100);
 		
 		backgroundImg = AssetFactory.instance().getImage(EImgType.BACKGROUND);*/
-		player = new Player("Player");
+		
+		List<Animation> playerAnimations = new ArrayList<Animation>();
+		playerAnimations.add( new Animation(AssetFactory.instance().getSpriteSheet(EAnimType.PLAYER_RUNNING), 100));
+		
 		background = new Sprite("Background");
 		
-		SpatialComponent backgroundSp = new SpatialComponent();
-		backgroundSp.setPosition(new Vector2f(0,0));		
-			
-		RenderComponent backgroundRd = new RenderComponent();
-		backgroundRd.setImage(AssetFactory.instance().getImage(EImgType.BACKGROUND));
-		backgroundRd.setLayer(0);
-		backgroundRd.connect(backgroundSp);
+		SpatialComponent backgroundSp = new SpatialComponent(background, new Vector2f(0,0));					
+		RenderComponent backgroundRender = new RenderComponent(backgroundSp, background, 0, AssetFactory.instance().getImage(EImgType.BACKGROUND));
 		
 		background.connect(backgroundSp);
-		background.connect(backgroundRd);
-		backgroundSp.connect(background);
+		background.connect(backgroundRender);	
 		
-		SpatialComponent playerSp = new SpatialComponent();
-		playerSp.setPosition(new Vector2f(100,100));
+		player = new Player("Player");
 		
-		InputComponent inputCm = new InputComponent();
-		inputCm.connect(playerSp);
-		inputCm.connect(player);
-		
-		RenderComponent playerRd = new RenderComponent();
-		playerRd.setImage(AssetFactory.instance().getImage(EImgType.PLAYER));
-		playerRd.setLayer(1);
-		playerRd.connect(playerSp);
+		SpatialComponent playerSp = new SpatialComponent(player, new Vector2f(100,100), ECollisionId.Player);				
+		InputComponent inputCm = new InputComponent(playerSp, player);						
+		RenderComponent playerRd = new AnimationRenderComponent(playerSp, player, 1, playerAnimations);		
 		
 		player.connect(playerSp);
 		player.connect(playerRd);
-		player.connect(inputCm);
-		playerSp.connect(player);
+		player.connect(inputCm);	
+		
+		
 		
 		InputManager.instance().addComponent(inputCm);
 		SpatialManager.instance().addComponent(backgroundSp);
 		SpatialManager.instance().addComponent(playerSp);
-		RenderingManager.instance().addComponent(backgroundRd);
+		RenderingManager.instance().addComponent(backgroundRender);
 		RenderingManager.instance().addComponent(playerRd);
 		
+		for(int i = 0; i < 20; i++){
+			Sprite enemy = new Sprite("Enemy");
+			SpatialComponent enemySp = new SpatialComponent(enemy, new Vector2f(100 * i,100 * i), ECollisionId.Enemies);
+			InputComponent anotherInput = new InputComponent(enemySp, enemy);
+			RenderComponent renderComponent = new AnimationRenderComponent(enemySp, enemy, 2, playerAnimations);
+			
+			
+			enemy.connect(enemySp);
+			enemy.connect(renderComponent);
+			enemy.connect(anotherInput);
+			
+			try {
+				enemySp.activate();
+				anotherInput.activate();
+			} catch (MissingComponentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			InputManager.instance().addComponent(anotherInput);
+			SpatialManager.instance().addComponent(enemySp);
+			RenderingManager.instance().addComponent(renderComponent);
+		}
 		try {
 			playerSp.activate();
 			backgroundSp.activate();
