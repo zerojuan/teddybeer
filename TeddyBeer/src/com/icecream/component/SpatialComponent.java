@@ -1,5 +1,7 @@
 package com.icecream.component;
 
+import java.util.logging.Logger;
+
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.util.Log;
@@ -11,6 +13,8 @@ import com.icecream.util.ECollisionId;
 
 public class SpatialComponent implements IComponent{
 
+	private static final Logger logger = Logger.getLogger(SpatialComponent.class.getName());
+	
 	private boolean active;
 	
 	private Entity entity;
@@ -22,11 +26,25 @@ public class SpatialComponent implements IComponent{
 	
 	protected ECollisionId collisionId;
 	
-	public SpatialComponent(){
+	public SpatialComponent(Entity owner){
+		this.entity = owner;
 		this.collisionId = ECollisionId.GUI;
 	}
 	
-	public SpatialComponent(ECollisionId collisionId){
+	public SpatialComponent(Entity owner, Vector2f position){
+		this.entity = owner;
+		this.collisionId = ECollisionId.GUI;
+		this.position = position;
+	}
+	
+	public SpatialComponent(Entity owner, Vector2f position, ECollisionId collisionId){
+		this.entity = owner;
+		this.collisionId = collisionId;
+		this.position = position;
+	}
+	
+	public SpatialComponent(Entity owner, ECollisionId collisionId){		
+		this.entity = owner;
 		this.collisionId = collisionId;
 	}
 	
@@ -41,7 +59,7 @@ public class SpatialComponent implements IComponent{
 		return velocity;
 	}
 	public void setVelocity(Vector2f velocity) {
-		Log.info("Setting velocity" + velocity.toString());
+		logger.fine("Setting velocity" + velocity.toString());
 		this.velocity = velocity;
 	}
 	public ECollisionId getCollisionId(){

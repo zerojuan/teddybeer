@@ -23,8 +23,9 @@ public class InputComponent implements IComponent{
 	 */
 	private SpatialComponent spatialComponent;
 	
-	public InputComponent(){
-		
+	public InputComponent(SpatialComponent spatialComponent, Entity owner){
+		this.spatialComponent = spatialComponent;
+		this.entity = owner;
 	}
 	
 	@Override
