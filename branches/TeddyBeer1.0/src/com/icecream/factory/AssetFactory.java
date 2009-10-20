@@ -5,6 +5,7 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.Sound;
 import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.particles.ParticleSystem;
+import org.newdawn.slick.tiled.TiledMap;
 import org.newdawn.slick.util.Log;
 
 import com.icecream.util.EAnimType;
@@ -23,6 +24,8 @@ public class AssetFactory {
 	private Image playerImage;
 	private Image blockImage;
 
+	private TiledMap testLevel;
+	
 	private SpriteSheet playerRunning;
 	
 	private static AssetFactory instance;	
@@ -37,6 +40,9 @@ public class AssetFactory {
 		//Instantiate sound
 		
 		//Instantiate particle systems
+		
+		//Instantiate tiled map
+		testLevel = new TiledMap("assets/test_level.tmx");
 	}
 	
 	public static AssetFactory instance(){
@@ -64,6 +70,10 @@ public class AssetFactory {
 			case PLAYER_RUNNING: return playerRunning; 
 		}
 		return null;
+	}
+	
+	public TiledMap getLevelMap(int level){
+		return testLevel;
 	}
 	
 	public Sound getSound(ESndType sndType){
