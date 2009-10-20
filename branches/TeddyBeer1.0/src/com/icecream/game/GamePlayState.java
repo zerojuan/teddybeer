@@ -1,40 +1,38 @@
 package com.icecream.game;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.newdawn.slick.Animation;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
-import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
+import org.newdawn.slick.tiled.TiledMap;
 
-import com.icecream.component.AnimationRenderComponent;
-import com.icecream.component.InputComponent;
-import com.icecream.component.RenderComponent;
-import com.icecream.component.SpatialComponent;
-import com.icecream.entity.Player;
-import com.icecream.entity.Sprite;
-import com.icecream.exception.MissingComponentException;
 import com.icecream.factory.AssetFactory;
-import com.icecream.manager.InputManager;
-import com.icecream.manager.RenderingManager;
-import com.icecream.manager.SpatialManager;
-import com.icecream.util.EAnimType;
-import com.icecream.util.ECollisionId;
-import com.icecream.util.EImgType;
 
 public class GamePlayState extends BasicGameState{
-	private int stateID = -1;
+	private int stateID = -1;	
+		
+	private TiledMap currentMap;
 	
-	private Sprite background;
-	
-	private Player player;
+	private boolean blocked[][];
 	
 	public GamePlayState(int state){
 		stateID = state;
+	}
+	
+	private void createLevel(int level){
+		currentMap = AssetFactory.instance().getLevelMap(level);
+		blocked = new boolean[currentMap.getWidth()][currentMap.getHeight()];
+		for(int xAxis = 0; xAxis < currentMap.getWidth(); xAxis++){
+			for(int yAxis = 0; yAxis < currentMap.getHeight(); yAxis++){
+				int tileId = currentMap.getTileId(xAxis, yAxis, 0);
+				String value = currentMap.getTileProperty(tileId, "blocked", "false");
+				if("true".equals(value)){
+					blocked[xAxis][yAxis] = true;
+				}
+			}
+		}
 	}
 	
 	@Override
@@ -45,85 +43,26 @@ public class GamePlayState extends BasicGameState{
 	@Override
 	public void init(GameContainer container, StateBasedGame game)
 			throws SlickException {
-		/*SpriteSheet spriteSheet = new SpriteSheet(
-						AssetFactory.instance().getImage(EImgType.PLAYER), 
-						288/8, 65,0,0);
-		running = new Animation(spriteSheet,100);
+		createLevel(0);
 		
-		backgroundImg = AssetFactory.instance().getImage(EImgType.BACKGROUND);*/
-		
-		List<Animation> playerAnimations = new ArrayList<Animation>();
-		playerAnimations.add( new Animation(AssetFactory.instance().getSpriteSheet(EAnimType.PLAYER_RUNNING), 100));
-		
-		background = new Sprite("Background");
-		
-		SpatialComponent backgroundSp = new SpatialComponent(background, new Vector2f(0,0));					
-		RenderComponent backgroundRender = new RenderComponent(backgroundSp, background, 0, AssetFactory.instance().getImage(EImgType.BACKGROUND));
-		
-		background.connect(backgroundSp);
-		background.connect(backgroundRender);	
-		
-		player = new Player("Player");
-		
-		SpatialComponent playerSp = new SpatialComponent(player, new Vector2f(100,100), ECollisionId.Player);				
-		InputComponent inputCm = new InputComponent(playerSp, player);						
-		RenderComponent playerRd = new AnimationRenderComponent(playerSp, player, 1, playerAnimations);		
-		
-		player.connect(playerSp);
-		player.connect(playerRd);
-		player.connect(inputCm);	
-		
-		
-		
-		InputManager.instance().addComponent(inputCm);
-		SpatialManager.instance().addComponent(backgroundSp);
-		SpatialManager.instance().addComponent(playerSp);
-		RenderingManager.instance().addComponent(backgroundRender);
-		RenderingManager.instance().addComponent(playerRd);
-		
-		for(int i = 0; i < 20; i++){
-			Sprite enemy = new Sprite("Enemy");
-			SpatialComponent enemySp = new SpatialComponent(enemy, new Vector2f(100 * i,100 * i), ECollisionId.Enemies);
-			InputComponent anotherInput = new InputComponent(enemySp, enemy);
-			RenderComponent renderComponent = new AnimationRenderComponent(enemySp, enemy, 2, playerAnimations);
-			
-			
-			enemy.connect(enemySp);
-			enemy.connect(renderComponent);
-			enemy.connect(anotherInput);
-			
-			try {
-				enemySp.activate();
-				anotherInput.activate();
-			} catch (MissingComponentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			InputManager.instance().addComponent(anotherInput);
-			SpatialManager.instance().addComponent(enemySp);
-			RenderingManager.instance().addComponent(renderComponent);
-		}
-		try {
-			playerSp.activate();
-			backgroundSp.activate();
-			inputCm.activate();
-		} catch (MissingComponentException e) {	
-			e.printStackTrace();
-		}
-	}
+	}	
 
 	@Override
 	public void render(GameContainer container, StateBasedGame game, Graphics g)
 			throws SlickException {
-		RenderingManager.instance().render(container, game, g);
+		currentMap.render(3, 3);
+		for(int xAxis = 0; xAxis < currentMap.getWidth(); xAxis++){
+			for(int yAxis = 0; yAxis < currentMap.getHeight(); yAxis++){
+				int tileId = currentMap.getTileId(xAxis, yAxis, 0);
+				Image value = currentMap.getTileImage(xAxis, yAxis, 0);
+				value.draw(20*xAxis, 20*yAxis, 1);
+			}
+		}
 	}
 
 	@Override
 	public void update(GameContainer container, StateBasedGame game, int delta)
 			throws SlickException {
-		InputManager.instance().update(container, game, delta);
-		SpatialManager.instance().update(container, game, delta);
 		
 	}
 	
