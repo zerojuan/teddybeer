@@ -18,6 +18,8 @@ public class TeddyBeerGame extends StateBasedGame implements IComponent{
 	
 	private boolean active;
 	
+	public static final boolean DEBUG_MODE = true;
+	
 	public TeddyBeerGame() {
 		super("TEDDY BEER");
 		
