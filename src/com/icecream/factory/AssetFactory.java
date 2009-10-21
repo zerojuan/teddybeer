@@ -27,6 +27,10 @@ public class AssetFactory {
 	private TiledMap testLevel;
 	
 	private SpriteSheet playerRunning;
+	private SpriteSheet playerIdleRight;
+	private SpriteSheet playerIdleUp;
+	private SpriteSheet playerIdleDown;
+	private SpriteSheet playerIdleLeft;
 	
 	private static AssetFactory instance;	
 	
@@ -37,6 +41,10 @@ public class AssetFactory {
 		playerRunning = new SpriteSheet(
 					playerImage, 
 					288/8, 65,0,0);
+		playerIdleRight = new SpriteSheet(new Image("assets/idle_right.png"), 90/3, 30, 0, 0);
+		playerIdleLeft = new SpriteSheet(new Image("assets/idle_left.png"), 90/3, 30, 0, 0);
+		playerIdleUp= new SpriteSheet(new Image("assets/idle_up.png"), 90/3, 30, 0, 0);
+		playerIdleDown = new SpriteSheet(new Image("assets/idle_down.png"), 90/3, 30, 0, 0);
 		//Instantiate sound
 		
 		//Instantiate particle systems
@@ -67,7 +75,11 @@ public class AssetFactory {
 	
 	public SpriteSheet getSpriteSheet(EAnimType animType){
 		switch(animType){
-			case PLAYER_RUNNING: return playerRunning; 
+			case PLAYER_RUNNING: return playerRunning;
+			case IDLE_DOWN: return playerIdleDown;
+			case IDLE_LEFT: return playerIdleRight;
+			case IDLE_UP: return playerIdleUp;
+			case IDLE_RIGHT: return playerIdleLeft;
 		}
 		return null;
 	}
