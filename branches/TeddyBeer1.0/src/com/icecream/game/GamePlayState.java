@@ -11,6 +11,7 @@ import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.tiled.TiledMap;
 
+import com.icecream.entity.Enemy;
 import com.icecream.entity.Player;
 import com.icecream.factory.AssetFactory;
 
@@ -26,6 +27,8 @@ public class GamePlayState extends BasicGameState{
 	private int TILE_SIZE = 20;
 	
 	private Player player;
+	
+	private Enemy enemy;
 	
 	public GamePlayState(int state){
 		stateID = state;
@@ -55,6 +58,7 @@ public class GamePlayState extends BasicGameState{
 			throws SlickException {
 		createLevel(0);
 		player = new Player("me",new Vector2f(10,10), new Vector2f(0,0));
+		enemy = new Enemy("you", new Vector2f(200,200), new Vector2f(0,0));
 	}	
 
 	@Override
@@ -70,19 +74,29 @@ public class GamePlayState extends BasicGameState{
 				}
 			}
 		}
-		
+		enemy.render(container, game, g);
 		player.render(container, game, g);
 	}
 
 	@Override
 	public void update(GameContainer container, StateBasedGame game, int delta)
 			throws SlickException {
+		enemy.update(container, game, delta);
 		player.update(container, game, delta);
 	}
 	
 	public boolean isBlocked(float x, float y){
 		int xBlock = (int)Math.floor(x / TILE_SIZE);
 		int yBlock = (int)Math.floor(y / TILE_SIZE);
+		if(xBlock < 0 || xBlock >= currentMap.getWidth())
+			return true;
+		if(yBlock < 0 || yBlock >= currentMap.getHeight()){
+			return true;
+		}
+		return blocked[xBlock][yBlock];
+	}
+	
+	public boolean isBlocked(int xBlock, int yBlock){
 		if(xBlock < 0 || xBlock >= currentMap.getWidth())
 			return true;
 		if(yBlock < 0 || yBlock >= currentMap.getHeight()){
