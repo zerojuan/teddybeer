@@ -7,6 +7,7 @@ import org.newdawn.slick.Animation;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.StateBasedGame;
@@ -16,34 +17,38 @@ import com.icecream.game.GamePlayState;
 import com.icecream.util.EAnimType;
 
 public class Enemy extends Entity {
-	private final static Logger logger = Logger.getLogger(Enemy.class.getName());
+	private final static Logger logger = Logger.getLogger(Enemy.class.getName());	
 	
-	private Vector2f position;
-	private Vector2f velocity;
+	private Entity player;
 	
 	private Rectangle boundingBox;
+	private Circle range;
 	
 	private Animation idleLeft;
 	private Animation idleRight;
 	private Animation idleUp;
-	private Animation idleDown;
+	private Animation idleDown;	
 	
 	private Animation currState;
 	
 	private Vector2f dest;
 	
 	private int SIZE = 20;
+	private int MID_ALERT_LEVEL = 200;
 	
 	private int decisionInterval;
+	private int alertLevel;
 	
 	float destX = 0f; 
 	float destY = 0f; 
 	
-	private enum EEnemyStatus{
+	public static enum Status{
 		STILL,
 		MOVING,
-		TARGETING
+		SHOOT
 	}
+	
+	public Status status;
 	
 	public Enemy(String id){
 		super(id);	
@@ -51,12 +56,19 @@ public class Enemy extends Entity {
 		
 	}
 	
-	public Enemy(String id, Vector2f position, Vector2f velocity){
+	public Enemy(String id, Vector2f position, Vector2f velocity, Entity player){
 		super(id);
+		init();
 		initAnimationStates();
 		this.position = position;
 		this.velocity = velocity;
 		this.boundingBox = new Rectangle(position.x, position.y, 20, 20);
+		this.range = new Circle(position.x, position.y, 100);
+		this.player = player;
+	}
+	
+	private void init(){
+		status = Status.MOVING;
 	}
 	
 	private void initAnimationStates(){
@@ -84,27 +96,64 @@ public class Enemy extends Entity {
 	@Override
 	public void render(GameContainer container, StateBasedGame game, Graphics g)
 			throws SlickException {
-		currState.draw(position.x, position.y);
-
+		currState.draw(position.x-10, position.y-20);
+		g.draw(boundingBox);
+		g.draw(range);
+		g.drawString(alertLevel+"", position.x, position.y);
 	}
 
 	@Override
 	public void update(GameContainer container, StateBasedGame game, int delta)
 			throws SlickException {
+		decisionInterval += delta;
 		GamePlayState gameState = (GamePlayState)(game.getCurrentState());
 		//Randomly walk to a spot	
+		if(status == Status.MOVING){
+			//Only look for new destination at specific intervals
+			if(decisionInterval >= 250){ 
+				destX = (float)(Math.random()*500) - 100;
+				destY = (float)(Math.random()*500) - 100;
+				decisionInterval = 0;
+			}
+			
+			Vector2f accel = move(destX,destY,delta);
+			if(!collisionDetect(gameState, accel)){
+				position.x += accel.x;
+				position.y += accel.y;
+				boundingBox.setCenterX(position.x);
+				boundingBox.setCenterY(position.y);
+				range.setCenterX(position.x);
+				range.setCenterY(position.y);
+			}
+			
+			//check if target is within vicinity
+			if(isTargetInRange()){
+				status = Status.STILL;
+				alertLevel = MID_ALERT_LEVEL;
+			}
+		}else if(status == Status.STILL){
+			if(((Player)player).status == Player.Status.HIDING){
+				alertLevel -= delta/2;
+			}else{
+				alertLevel += delta/2;
+			}
+			
+			if(alertLevel >= MID_ALERT_LEVEL*2){
+				status = Status.SHOOT;
+			}else if(alertLevel < 0){
+				status = Status.MOVING;
+			}
+		}else if(status == Status.SHOOT){
+			if(!isTargetInRange()){
+				alertLevel -= delta/2;
+			}
+			
+			if(alertLevel < 0){
+				status = Status.MOVING;
+			}
+		}
 		
-		if(decisionInterval >= 250){
-			destX = (float)(Math.random()*500) - 100;
-			destY = (float)(Math.random()*500) - 100;
-			decisionInterval = 0;
-		}
-		decisionInterval += delta;
-		Vector2f accel = move(destX,destY,delta);
-		if(!collisionDetect(gameState, accel)){
-			position.x += accel.x;
-			position.y += accel.y;
-		}
+		
 		
 		//Scan for player
 		//If player was seen
@@ -112,6 +161,13 @@ public class Enemy extends Entity {
 			//if still i see then shoot
 				
 		
+	}
+	
+	private boolean isTargetInRange(){
+		if(((Player)player).status == Player.Status.HIDING){
+			return false;
+		}
+		return range.intersects(player.getBoundingBox());
 	}
 	
 	private boolean collisionDetect(GamePlayState gameState, Vector2f accel){
