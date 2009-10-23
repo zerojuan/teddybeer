@@ -12,6 +12,7 @@ import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.tiled.TiledMap;
 
 import com.icecream.entity.Enemy;
+import com.icecream.entity.Entity;
 import com.icecream.entity.Player;
 import com.icecream.factory.AssetFactory;
 
@@ -26,9 +27,9 @@ public class GamePlayState extends BasicGameState{
 	
 	private int TILE_SIZE = 20;
 	
-	private Player player;
+	private Entity player;
 	
-	private Enemy enemy;
+	private Enemy[] enemies;
 	
 	public GamePlayState(int state){
 		stateID = state;
@@ -58,7 +59,11 @@ public class GamePlayState extends BasicGameState{
 			throws SlickException {
 		createLevel(0);
 		player = new Player("me",new Vector2f(10,10), new Vector2f(0,0));
-		enemy = new Enemy("you", new Vector2f(200,200), new Vector2f(0,0));
+		enemies = new Enemy[4];
+		enemies[0] = new Enemy("you", new Vector2f(200,200), new Vector2f(0,0), player);
+		enemies[1] = new Enemy("you", new Vector2f(450,400), new Vector2f(0,0), player);
+		enemies[2] = new Enemy("you", new Vector2f(300,400), new Vector2f(0,0), player);
+		enemies[3] = new Enemy("you", new Vector2f(400,200), new Vector2f(0,0), player);
 	}	
 
 	@Override
@@ -74,14 +79,18 @@ public class GamePlayState extends BasicGameState{
 				}
 			}
 		}
-		enemy.render(container, game, g);
+		for(int i = 0; i < 4; i++){
+			enemies[i].render(container, game, g);
+		}
 		player.render(container, game, g);
 	}
 
 	@Override
 	public void update(GameContainer container, StateBasedGame game, int delta)
 			throws SlickException {
-		enemy.update(container, game, delta);
+		for(int i = 0; i < 4; i++){
+			enemies[i].update(container, game, delta);
+		}
 		player.update(container, game, delta);
 	}
 	

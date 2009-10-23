@@ -19,12 +19,7 @@ import com.icecream.game.TeddyBeerGame;
 import com.icecream.util.EAnimType;
 
 
-public class Player extends Entity{
-	
-	private Vector2f position;
-	private Vector2f velocity;
-	
-	private Rectangle boundingBox;
+public class Player extends Entity{		
 	
 	private Animation idleLeft;
 	private Animation idleRight;
@@ -36,6 +31,14 @@ public class Player extends Entity{
 	private Rectangle[] territory;
 	
 	private int SIZE = 18;
+	
+	public static enum Status{
+		WALKIN_EMPTY,
+		BEER_WALKING,
+		HIDING
+	}
+	
+	public Status status;
 	
 	public Player(String id){
 		super(id);	
@@ -49,6 +52,7 @@ public class Player extends Entity{
 		this.position = position;
 		this.velocity = velocity;
 		this.boundingBox = new Rectangle(position.x,position.y,SIZE,SIZE);
+		this.status = Status.WALKIN_EMPTY;
 		initTerritories();
 	}
 	
@@ -82,34 +86,6 @@ public class Player extends Entity{
 		
 	}
 	
-	public Vector2f getPosition() {
-		return position;
-	}
-
-	public void setPosition(Vector2f position) {
-		this.position = position;
-	}
-
-	public Vector2f getVelocity() {
-		return velocity;
-	}
-
-	public void setVelocity(Vector2f velocity) {
-		this.velocity = velocity;
-	}
-
-
-
-	public Rectangle getBoundingBox() {
-		return boundingBox;
-	}
-
-
-
-	public void setBoundingBox(Rectangle boundingBox) {
-		this.boundingBox = boundingBox;
-	}
-
 	public void setTerritory(){
 		Point topLeft = new Point((int)position.x/20, (int)position.y/20);
 		Point topRight = new Point((int)(position.x + boundingBox.getWidth())/20, (int)position.y/20);
@@ -125,7 +101,7 @@ public class Player extends Entity{
 	@Override
 	public void render(GameContainer container, StateBasedGame game, Graphics g)
 			throws SlickException {
-		currState.draw(position.x - 5, position.y - 10);
+		currState.draw(position.x - 10, position.y - 20);
 		if(TeddyBeerGame.DEBUG_MODE){
 			//FIXME: Remove this upon release
 			g.setColor(Color.red);
@@ -134,6 +110,7 @@ public class Player extends Entity{
 			}
 			g.setColor(Color.white);
 			g.draw(boundingBox);
+			g.drawString(status.toString(), position.x, position.y);
 		}
 			
 	}
@@ -187,11 +164,19 @@ public class Player extends Entity{
 	                 x +=fdelta;
 	             }
 	         }
+	         if(input.isKeyDown(Input.KEY_X) && status != Player.Status.BEER_WALKING){
+	        	 status = Player.Status.HIDING;
+	         }
+	         if(position.x != x || position.y != y){
+	        	 if(status == Player.Status.HIDING){
+	        		 status = Player.Status.WALKIN_EMPTY;
+	        	 }
+	         }
 	         
 	         position.x = x;
 	         position.y = y;
-	         boundingBox.setX(position.x);
-	         boundingBox.setY(position.y);
+	         boundingBox.setCenterX(position.x);
+	         boundingBox.setCenterY(position.y);
 	         setTerritory();
 		
 	}
