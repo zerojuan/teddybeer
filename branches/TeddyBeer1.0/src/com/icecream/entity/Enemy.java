@@ -37,6 +37,7 @@ public class Enemy extends Entity {
 	private int MID_ALERT_LEVEL = 200;
 	
 	private int decisionInterval;
+	private int twitchInterval;
 	private int alertLevel;
 	
 	float destX = 0f; 
@@ -106,14 +107,20 @@ public class Enemy extends Entity {
 	public void update(GameContainer container, StateBasedGame game, int delta)
 			throws SlickException {
 		decisionInterval += delta;
+		twitchInterval += delta;
 		GamePlayState gameState = (GamePlayState)(game.getCurrentState());
 		//Randomly walk to a spot	
 		if(status == Status.MOVING){
 			//Only look for new destination at specific intervals
 			if(decisionInterval >= 250){ 
-				destX = (float)(Math.random()*500) - 100;
-				destY = (float)(Math.random()*500) - 100;
-				decisionInterval = 0;
+				destX = (float)(Math.random()*200) - 100 + position.x;
+				destY = (float)(Math.random()*200) - 100 + position.y;
+				decisionInterval = 0;				
+			}
+			
+			if(twitchInterval >= 3000){
+				setDrunkenSpriteDirection();
+				twitchInterval = 0;
 			}
 			
 			Vector2f accel = move(destX,destY,delta);
@@ -161,6 +168,19 @@ public class Enemy extends Entity {
 			//if still i see then shoot
 				
 		
+	}
+	
+	private void setDrunkenSpriteDirection(){
+		int direction = (int)(Math.random()*3);		
+		if(direction == 0){
+			currState = idleLeft;
+		}else if(direction == 1){
+			currState = idleRight;
+		}else if(direction == 2){
+			currState = idleUp;
+		}else if(direction == 3){
+			currState = idleDown;
+		}
 	}
 	
 	private boolean isTargetInRange(){
