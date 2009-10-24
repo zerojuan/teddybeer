@@ -35,7 +35,8 @@ public class Player extends Entity{
 	public static enum Status{
 		WALKIN_EMPTY,
 		BEER_WALKING,
-		HIDING
+		HIDING,
+		DEAD
 	}
 	
 	public Status status;
@@ -97,7 +98,13 @@ public class Player extends Entity{
 		territory[2].setLocation(bottomLeft.x*20, bottomLeft.y*20);
 		territory[3].setLocation(bottomRight.x*20, bottomRight.y*20);
 	}
-
+	/**
+	 * Called if the player is hit
+	 */
+	public void hurt(){
+		status = Status.DEAD;
+	}
+	
 	@Override
 	public void render(GameContainer container, StateBasedGame game, Graphics g)
 			throws SlickException {
@@ -123,50 +130,55 @@ public class Player extends Entity{
 		  	float y = position.y;
 		  	float fdelta = delta * 0.1f;
 		  	GamePlayState gameState = (GamePlayState)(game.getCurrentState());
-	         if (input.isKeyDown(Input.KEY_UP))	        	 
-	         {
-	             currState = idleUp;
-	             //if (!gameState.collidesWithBlock(x, y - delta * 0.1f))
-	             if (!(gameState.isBlocked(x, y-fdelta) || gameState.isBlocked(x+SIZE-1, y-fdelta)))
-	             {
-	                 currState.update(delta);
-	                 // The lower the delta the slowest the sprite will animate.
-	                 y -= fdelta;
-	             }
-	         }
-	         if (input.isKeyDown(Input.KEY_DOWN))
-	         {
-	             currState = idleDown;
-	             //if (!gameState.collidesWithBlock(x, y + 20 + delta * 0.1f))
-	             if (!(gameState.isBlocked(x, y+SIZE+fdelta) || gameState.isBlocked(x+SIZE-1, y+SIZE+fdelta)))
-	             {
-	                 currState.update(delta);
-	                 y += fdelta;
-	             }
-	         }
-	         if (input.isKeyDown(Input.KEY_LEFT))
-	         {
-	             currState = idleLeft;
-	             //if (!gameState.collidesWithBlock(x - fdelta, y))
-	             if (!(gameState.isBlocked(x - fdelta, y) || gameState.isBlocked(x-fdelta, y+SIZE-1)))
-	             {
-	                 currState.update(delta);
-	                 x -= fdelta;
-	             }
-	         }
-	         if (input.isKeyDown(Input.KEY_RIGHT))
-	         {
-	             currState = idleRight;
-	             //if (!gameState.collidesWithBlock(x + 20 + delta * 0.1f, y))
-	             if (!(gameState.isBlocked(x + SIZE + fdelta, y) || gameState.isBlocked(x+SIZE+fdelta, y+SIZE-1)))
-	             {
-	                 currState.update(delta);
-	                 x +=fdelta;
-	             }
-	         }
-	         if(input.isKeyDown(Input.KEY_X) && status != Player.Status.BEER_WALKING){
-	        	 status = Player.Status.HIDING;
-	         }
+		  	if(status != Status.DEAD){
+		  		 if (input.isKeyDown(Input.KEY_UP))	        	 
+		         {
+		             currState = idleUp;
+		             //if (!gameState.collidesWithBlock(x, y - delta * 0.1f))
+		             if (!(gameState.isBlocked(x, y-fdelta) || gameState.isBlocked(x+SIZE-1, y-fdelta)))
+		             {
+		                 currState.update(delta);
+		                 // The lower the delta the slowest the sprite will animate.
+		                 y -= fdelta;
+		             }
+		         }
+		         if (input.isKeyDown(Input.KEY_DOWN))
+		         {
+		             currState = idleDown;
+		             //if (!gameState.collidesWithBlock(x, y + 20 + delta * 0.1f))
+		             if (!(gameState.isBlocked(x, y+SIZE+fdelta) || gameState.isBlocked(x+SIZE-1, y+SIZE+fdelta)))
+		             {
+		                 currState.update(delta);
+		                 y += fdelta;
+		             }
+		         }
+		         if (input.isKeyDown(Input.KEY_LEFT))
+		         {
+		             currState = idleLeft;
+		             //if (!gameState.collidesWithBlock(x - fdelta, y))
+		             if (!(gameState.isBlocked(x - fdelta, y) || gameState.isBlocked(x-fdelta, y+SIZE-1)))
+		             {
+		                 currState.update(delta);
+		                 x -= fdelta;
+		             }
+		         }
+		         if (input.isKeyDown(Input.KEY_RIGHT))
+		         {
+		             currState = idleRight;
+		             //if (!gameState.collidesWithBlock(x + 20 + delta * 0.1f, y))
+		             if (!(gameState.isBlocked(x + SIZE + fdelta, y) || gameState.isBlocked(x+SIZE+fdelta, y+SIZE-1)))
+		             {
+		                 currState.update(delta);
+		                 x +=fdelta;
+		             }
+		         }
+		         if(input.isKeyDown(Input.KEY_X) && status != Player.Status.BEER_WALKING){
+		        	 status = Player.Status.HIDING;
+		         }
+		  	}else{
+		  		
+		  	}
+	        
 	         if(position.x != x || position.y != y){
 	        	 if(status == Player.Status.HIDING){
 	        		 status = Player.Status.WALKIN_EMPTY;

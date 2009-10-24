@@ -40,7 +40,7 @@ public class TeddyBeerGame extends StateBasedGame implements IComponent{
 		container.setShowFPS(true);
 		
 		this.getState(MENUSTATE).init(container, this);
-		this.getState(GAMEPLAYSTATE).init(container, this);
+		//this.getState(GAMEPLAYSTATE).init(container, this);
 	}
 
 	/**
