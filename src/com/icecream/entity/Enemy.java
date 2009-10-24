@@ -24,6 +24,8 @@ public class Enemy extends Entity {
 	private Rectangle boundingBox;
 	private Circle range;
 	
+	private Bullet[] bullets;
+	
 	private Animation idleLeft;
 	private Animation idleRight;
 	private Animation idleUp;
@@ -38,6 +40,7 @@ public class Enemy extends Entity {
 	
 	private int decisionInterval;
 	private int twitchInterval;
+	private int reloadInterval;
 	private int alertLevel;
 	
 	float destX = 0f; 
@@ -57,7 +60,7 @@ public class Enemy extends Entity {
 		
 	}
 	
-	public Enemy(String id, Vector2f position, Vector2f velocity, Entity player){
+	public Enemy(String id, Vector2f position, Vector2f velocity, Entity player, Bullet[] bullets){
 		super(id);
 		init();
 		initAnimationStates();
@@ -65,6 +68,7 @@ public class Enemy extends Entity {
 		this.velocity = velocity;
 		this.boundingBox = new Rectangle(position.x, position.y, 20, 20);
 		this.range = new Circle(position.x, position.y, 100);
+		this.bullets = bullets;
 		this.player = player;
 	}
 	
@@ -115,6 +119,8 @@ public class Enemy extends Entity {
 			if(decisionInterval >= 250){ 
 				destX = (float)(Math.random()*200) - 100 + position.x;
 				destY = (float)(Math.random()*200) - 100 + position.y;
+				//destX = (float)(Math.random()*200) - 100 + player.getPosition().x;
+				//destY = (float)(Math.random()*200) - 100 + player.getPosition().y;
 				decisionInterval = 0;				
 			}
 			
@@ -151,12 +157,14 @@ public class Enemy extends Entity {
 				status = Status.MOVING;
 			}
 		}else if(status == Status.SHOOT){
+			reloadInterval += delta;
 			if(!isTargetInRange()){
 				alertLevel -= delta/2;
 			}
-			
+			shoot();
 			if(alertLevel < 0){
 				status = Status.MOVING;
+				reloadInterval = 1000;
 			}
 		}
 		
@@ -167,6 +175,14 @@ public class Enemy extends Entity {
 			//count to 10
 			//if still i see then shoot
 				
+		
+	}
+	
+	private void shoot(){
+		if(reloadInterval > 1000){
+			bullets[Bullet.currBullet].shoot(position, player.getPosition());
+			reloadInterval = 0;
+		}
 		
 	}
 	

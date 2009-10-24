@@ -11,6 +11,7 @@ import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.tiled.TiledMap;
 
+import com.icecream.entity.Bullet;
 import com.icecream.entity.Enemy;
 import com.icecream.entity.Entity;
 import com.icecream.entity.Player;
@@ -30,6 +31,8 @@ public class GamePlayState extends BasicGameState{
 	private Entity player;
 	
 	private Enemy[] enemies;
+	
+	private Bullet[] bullets;
 	
 	public GamePlayState(int state){
 		stateID = state;
@@ -58,12 +61,16 @@ public class GamePlayState extends BasicGameState{
 	public void init(GameContainer container, StateBasedGame game)
 			throws SlickException {
 		createLevel(0);
+		bullets = new Bullet[5];
 		player = new Player("me",new Vector2f(10,10), new Vector2f(0,0));
+		for(int i = 0; i < 5; i++){
+			bullets[i] = new Bullet(""+i,new Vector2f(0,0), new Vector2f(0,0), player);
+		}		
 		enemies = new Enemy[4];
-		enemies[0] = new Enemy("you", new Vector2f(200,200), new Vector2f(0,0), player);
-		enemies[1] = new Enemy("you", new Vector2f(450,400), new Vector2f(0,0), player);
-		enemies[2] = new Enemy("you", new Vector2f(300,400), new Vector2f(0,0), player);
-		enemies[3] = new Enemy("you", new Vector2f(400,200), new Vector2f(0,0), player);
+		enemies[0] = new Enemy("you", new Vector2f(200,200), new Vector2f(0,0), player, bullets);
+		enemies[1] = new Enemy("you", new Vector2f(100,400), new Vector2f(0,0), player, bullets);
+		enemies[2] = new Enemy("you", new Vector2f(500,400), new Vector2f(0,0), player, bullets);
+		enemies[3] = new Enemy("you", new Vector2f(400,200), new Vector2f(0,0), player, bullets);
 	}	
 
 	@Override
@@ -82,6 +89,9 @@ public class GamePlayState extends BasicGameState{
 		for(int i = 0; i < 4; i++){
 			enemies[i].render(container, game, g);
 		}
+		for(int i = 0; i < 5; i++){
+			bullets[i].render(container, game, g);
+		}
 		player.render(container, game, g);
 	}
 
@@ -90,6 +100,9 @@ public class GamePlayState extends BasicGameState{
 			throws SlickException {
 		for(int i = 0; i < 4; i++){
 			enemies[i].update(container, game, delta);
+		}
+		for(int i = 0; i < 5; i++){
+			bullets[i].update(container, game, delta);
 		}
 		player.update(container, game, delta);
 	}
