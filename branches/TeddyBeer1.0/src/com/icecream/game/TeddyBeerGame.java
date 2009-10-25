@@ -29,7 +29,7 @@ public class TeddyBeerGame extends StateBasedGame implements IComponent{
 		this.addState(gamePlayState);
 		this.addState(menuState);
 		
-		this.enterState(MENUSTATE);
+		this.enterState(GAMEPLAYSTATE);
 		
 			
 	}
