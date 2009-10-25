@@ -40,7 +40,7 @@ public class Enemy extends Entity {
 	
 	private int decisionInterval;
 	private int twitchInterval;
-	private int reloadInterval;
+	private int reloadInterval = 1000;
 	private int alertLevel;
 	
 	float destX = 0f; 
@@ -158,8 +158,11 @@ public class Enemy extends Entity {
 			}
 		}else if(status == Status.SHOOT){
 			reloadInterval += delta;
-			if(!isTargetInRange()){
+			if(((Player)player).status == Player.Status.HIDING){
 				alertLevel -= delta/2;
+			}
+			if(!isTargetInRange()){
+				alertLevel = -1;
 			}
 			shoot();
 			if(alertLevel < 0){

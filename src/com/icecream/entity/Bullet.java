@@ -10,6 +10,9 @@ import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.StateBasedGame;
 
+import com.icecream.game.GamePlayState;
+import com.icecream.util.MathD;
+
 public class Bullet extends Entity {
 	private static final Logger logger = Logger.getLogger(Bullet.class.getName());
 	public static int currBullet;
@@ -42,8 +45,9 @@ public class Bullet extends Entity {
 		active = true;
 		this.origin = origin.copy();
 		this.dest = dest.copy();
-		circle.setRadius(10);
-		velocity.set(1, 1);
+		circle.setRadius(3);
+		velocity.set(5, 1);
+		velocity.setTheta(MathD.angleBetween(origin, dest));
 		position = this.origin;
 		//Increment bullet id
 		currBullet++;
@@ -66,14 +70,17 @@ public class Bullet extends Entity {
 	@Override
 	public void update(GameContainer container, StateBasedGame game, int delta)
 			throws SlickException {
+		GamePlayState gameState = (GamePlayState)(game.getCurrentState());
 		if(active){			
-			velocity = move(delta);
+			//velocity = move(delta);
 			position.add(velocity);			
 			circle.setCenterX(position.x);
 			circle.setCenterY(position.y);
-			
+			if(gameState.isBlocked(position.x, position.y)){
+				active = false;
+			}
 			if(circle.intersects(player.getBoundingBox())){
-				((Player)player).hurt();
+			//	((Player)player).hurt();
 				active = false;
 			}
 		}
@@ -85,8 +92,8 @@ public class Bullet extends Entity {
 		//float incY = (globalToLocal(position.y, dest.y)) / (speed);			
 		//float incX = dest.x / (speed);	
 		//float incY = dest.y / (speed);
-		velocity.setTheta(angleBetween(origin, dest));
-		//logger.info(velocity.getTheta() + "");
+		//velocity.setTheta(angleBetween(origin, dest));
+				
 		return velocity;
 		//return new Vector2f(incX,incY);				
 	}
