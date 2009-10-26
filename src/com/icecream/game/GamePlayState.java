@@ -1,9 +1,11 @@
 package com.icecream.game;
 
+import java.awt.Point;
 import java.util.logging.Logger;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
@@ -26,13 +28,16 @@ public class GamePlayState extends BasicGameState{
 	
 	private boolean blocked[][];
 	
-	private int TILE_SIZE = 20;
+	public static int TILE_SIZE = 20;
 	
 	private Entity player;
 	
 	private Enemy[] enemies;
 	
 	private Bullet[] bullets;
+	
+	private Point beerHouse;
+	private Point bearHouse;
 	
 	public GamePlayState(int state){
 		stateID = state;
@@ -48,8 +53,38 @@ public class GamePlayState extends BasicGameState{
 				if("true".equals(value)){					
 					blocked[xAxis][yAxis] = true;
 				}
+				tileId = currentMap.getTileId(xAxis, yAxis, 2);
+				value = currentMap.getTileProperty(tileId, "blocked", "false");
+				if("true".equals(value)){					
+					blocked[xAxis][yAxis] = true;
+				}
 			}
 		}
+		beerHouse.setLocation(27,3);
+		bearHouse.setLocation(3,3);
+		
+	}
+	
+	public boolean isWithinBeerHouse(float x, float y){
+		int xBlock = (int)Math.floor(x / TILE_SIZE);
+		int yBlock = (int)Math.floor(y / TILE_SIZE);
+		if(xBlock < 0 || xBlock >= currentMap.getWidth())
+			return true;
+		if(yBlock < 0 || yBlock >= currentMap.getHeight()){
+			return true;
+		}
+		return beerHouse.equals(new Point(xBlock,yBlock));
+	}
+	
+	public boolean isWithinBearHouse(float x, float y){
+		int xBlock = (int)Math.floor(x / TILE_SIZE);
+		int yBlock = (int)Math.floor(y / TILE_SIZE);
+		if(xBlock < 0 || xBlock >= currentMap.getWidth())
+			return true;
+		if(yBlock < 0 || yBlock >= currentMap.getHeight()){
+			return true;
+		}
+		return bearHouse.equals(new Point(xBlock,yBlock));
 	}
 	
 	@Override
@@ -59,10 +94,13 @@ public class GamePlayState extends BasicGameState{
 
 	@Override
 	public void init(GameContainer container, StateBasedGame game)
-			throws SlickException {
+			throws SlickException {	
+		beerHouse = new Point(90,90);
+		bearHouse = new Point(80,90);		
 		createLevel(0);
-		bullets = new Bullet[5];
-		player = new Player("me",new Vector2f(10,10), new Vector2f(0,0));
+		player = new Player("me",new Vector2f(bearHouse.x * TILE_SIZE,bearHouse.y * TILE_SIZE), new Vector2f(0,0));
+		((Player)player).setRespawnPoint(bearHouse);
+		bullets = new Bullet[5];		
 		for(int i = 0; i < 5; i++){
 			bullets[i] = new Bullet(""+i,new Vector2f(0,0), new Vector2f(0,0), player);
 		}		
@@ -92,12 +130,18 @@ public class GamePlayState extends BasicGameState{
 		for(int i = 0; i < 5; i++){
 			bullets[i].render(container, game, g);
 		}
+		
 		player.render(container, game, g);
+		currentMap.render(0, 0, 0, 0, currentMap.getWidth(), currentMap.getHeight(), 2, false);
 	}
 
 	@Override
 	public void update(GameContainer container, StateBasedGame game, int delta)
 			throws SlickException {
+		Input in = container.getInput();
+		if(in.isKeyPressed(Input.KEY_Q)){
+			TeddyBeerGame.DEBUG_MODE= !(TeddyBeerGame.DEBUG_MODE);
+		}
 		for(int i = 0; i < 4; i++){
 			enemies[i].update(container, game, delta);
 		}
