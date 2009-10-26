@@ -2,6 +2,7 @@ package com.icecream.entity;
 
 
 import java.awt.Point;
+import java.util.logging.Logger;
 
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
@@ -20,6 +21,7 @@ import com.icecream.util.EAnimType;
 
 
 public class Player extends Entity{		
+	private static final Logger logger = Logger.getLogger(Player.class.getName());
 	
 	private Animation idleLeft;
 	private Animation idleRight;
@@ -29,6 +31,8 @@ public class Player extends Entity{
 	private Animation currState;
 	
 	private Rectangle[] territory;
+	
+	private Point respawnPoint;
 	
 	private int SIZE = 18;
 	
@@ -54,6 +58,7 @@ public class Player extends Entity{
 		this.velocity = velocity;
 		this.boundingBox = new Rectangle(position.x,position.y,SIZE,SIZE);
 		this.status = Status.WALKIN_EMPTY;
+		this.respawnPoint = new Point(0,0);
 		initTerritories();
 	}
 	
@@ -63,6 +68,14 @@ public class Player extends Entity{
 		territory[1] = new Rectangle(position.x,position.y,SIZE, SIZE);
 		territory[2] = new Rectangle(position.x,position.y,SIZE, SIZE);
 		territory[3] = new Rectangle(position.x,position.y,SIZE, SIZE);
+	}
+	
+	public void setRespawnPoint(Point point){
+		respawnPoint = point;
+	}
+	
+	private void respawn(){
+		position.set(respawnPoint.x * GamePlayState.TILE_SIZE, respawnPoint.y * GamePlayState.TILE_SIZE);
 	}
 	
 	private void initAnimationStates(){
@@ -98,6 +111,14 @@ public class Player extends Entity{
 		territory[2].setLocation(bottomLeft.x*20, bottomLeft.y*20);
 		territory[3].setLocation(bottomRight.x*20, bottomRight.y*20);
 	}
+	
+	public boolean isWithinBeerHouse(GamePlayState game){
+		return game.isWithinBeerHouse(position.x, position.y);
+	}
+	
+	public boolean isWithinBearHouse(GamePlayState game){
+		return game.isWithinBearHouse(position.x, position.y);
+	}
 	/**
 	 * Called if the player is hit
 	 */
@@ -108,7 +129,7 @@ public class Player extends Entity{
 	@Override
 	public void render(GameContainer container, StateBasedGame game, Graphics g)
 			throws SlickException {
-		currState.draw(position.x - 10, position.y - 20);
+		currState.draw(position.x-7, position.y-15);
 		if(TeddyBeerGame.DEBUG_MODE){
 			//FIXME: Remove this upon release
 			g.setColor(Color.red);
@@ -175,21 +196,32 @@ public class Player extends Entity{
 		         if(input.isKeyDown(Input.KEY_X) && status != Player.Status.BEER_WALKING){
 		        	 status = Player.Status.HIDING;
 		         }
+		         
+		         if(isWithinBeerHouse(gameState) && status == Player.Status.WALKIN_EMPTY){
+		        	 status = Player.Status.BEER_WALKING;
+		         }
+		         
+		         if(isWithinBearHouse(gameState) && status == Player.Status.BEER_WALKING){
+		        	 status = Player.Status.WALKIN_EMPTY;
+		        	 logger.info("SCORE!");
+		         }
+		         if(position.x != x || position.y != y){
+		        	 if(status == Player.Status.HIDING){
+		        		 status = Player.Status.WALKIN_EMPTY;
+		        	 }
+		         }
+		         
+		         position.x = x;
+		         position.y = y;
+		         boundingBox.setX(position.x);
+		         boundingBox.setY(position.y);
+		         setTerritory();
 		  	}else{
-		  		
+		  		respawn();
+		  		status = Player.Status.WALKIN_EMPTY;
 		  	}
 	        
-	         if(position.x != x || position.y != y){
-	        	 if(status == Player.Status.HIDING){
-	        		 status = Player.Status.WALKIN_EMPTY;
-	        	 }
-	         }
 	         
-	         position.x = x;
-	         position.y = y;
-	         boundingBox.setCenterX(position.x);
-	         boundingBox.setCenterY(position.y);
-	         setTerritory();
 		
 	}
 

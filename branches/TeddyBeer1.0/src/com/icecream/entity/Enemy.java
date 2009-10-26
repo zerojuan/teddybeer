@@ -14,6 +14,7 @@ import org.newdawn.slick.state.StateBasedGame;
 
 import com.icecream.factory.AssetFactory;
 import com.icecream.game.GamePlayState;
+import com.icecream.game.TeddyBeerGame;
 import com.icecream.util.EAnimType;
 
 public class Enemy extends Entity {
@@ -101,10 +102,13 @@ public class Enemy extends Entity {
 	@Override
 	public void render(GameContainer container, StateBasedGame game, Graphics g)
 			throws SlickException {
-		currState.draw(position.x-10, position.y-20);
-		g.draw(boundingBox);
-		g.draw(range);
-		g.drawString(alertLevel+"", position.x, position.y);
+		currState.draw(position.x-7, position.y-15);
+		if(TeddyBeerGame.DEBUG_MODE){
+			g.draw(boundingBox);
+			g.draw(range);
+			g.drawString(alertLevel+"", position.x, position.y);
+		}
+		
 	}
 
 	@Override
@@ -133,8 +137,8 @@ public class Enemy extends Entity {
 			if(!collisionDetect(gameState, accel)){
 				position.x += accel.x;
 				position.y += accel.y;
-				boundingBox.setCenterX(position.x);
-				boundingBox.setCenterY(position.y);
+				boundingBox.setX(position.x);
+				boundingBox.setY(position.y);
 				range.setCenterX(position.x);
 				range.setCenterY(position.y);
 			}

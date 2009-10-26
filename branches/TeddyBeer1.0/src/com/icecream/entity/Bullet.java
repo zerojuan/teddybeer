@@ -80,7 +80,7 @@ public class Bullet extends Entity {
 				active = false;
 			}
 			if(circle.intersects(player.getBoundingBox())){
-			//	((Player)player).hurt();
+				((Player)player).hurt();
 				active = false;
 			}
 		}
