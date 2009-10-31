@@ -12,24 +12,28 @@ import com.icecream.unit.IComponent;
 public class TeddyBeerGame extends StateBasedGame implements IComponent{
 	public static final int MENUSTATE = 0;
 	public static final int GAMEPLAYSTATE = 1;
+	public static final int GAMEOVERSTATE = 2;
 	
 	private GamePlayState gamePlayState;
 	private MenuState menuState;
+	private GameOverState gameOverState;
 	
 	private boolean active;
 	
-	public static boolean DEBUG_MODE = true;
+	public static boolean DEBUG_MODE = false;
 	
 	public TeddyBeerGame() {
 		super("TEDDY BEER");
 		
 		gamePlayState = new GamePlayState(GAMEPLAYSTATE);
 		menuState = new MenuState(MENUSTATE);
+		gameOverState = new GameOverState(GAMEOVERSTATE);
 		
 		this.addState(gamePlayState);
 		this.addState(menuState);
+		this.addState(gameOverState);
 		
-		this.enterState(GAMEPLAYSTATE);
+		this.enterState(MENUSTATE);
 		
 			
 	}

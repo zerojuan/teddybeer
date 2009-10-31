@@ -6,7 +6,9 @@ import java.util.logging.Logger;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.Sound;
 import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
@@ -16,6 +18,8 @@ import com.icecream.factory.AssetFactory;
 import com.icecream.game.GamePlayState;
 import com.icecream.game.TeddyBeerGame;
 import com.icecream.util.EAnimType;
+import com.icecream.util.EImgType;
+import com.icecream.util.ESndType;
 
 public class Enemy extends Entity {
 	private final static Logger logger = Logger.getLogger(Enemy.class.getName());	
@@ -27,12 +31,15 @@ public class Enemy extends Entity {
 	
 	private Bullet[] bullets;
 	
-	private Animation idleLeft;
-	private Animation idleRight;
-	private Animation idleUp;
-	private Animation idleDown;	
+	private Animation randomAnim;
+	private Animation alertLeft;
+	private Animation alertRight;
+	private Animation shootLeft;
+	private Animation shootRight;
 	
 	private Animation currState;
+	
+	private Image alertImage;
 	
 	private Vector2f dest;
 	
@@ -43,7 +50,7 @@ public class Enemy extends Entity {
 	private int twitchInterval;
 	private int reloadInterval = 1000;
 	private int alertLevel;
-	
+	private Sound gunShotSound; 
 	float destX = 0f; 
 	float destY = 0f; 
 	
@@ -58,7 +65,7 @@ public class Enemy extends Entity {
 	public Enemy(String id){
 		super(id);	
 		initAnimationStates();
-		
+	
 	}
 	
 	public Enemy(String id, Vector2f position, Vector2f velocity, Entity player, Bullet[] bullets){
@@ -74,28 +81,35 @@ public class Enemy extends Entity {
 	}
 	
 	private void init(){
+		gunShotSound = AssetFactory.instance().getSound(ESndType.GUNSHOT);
 		status = Status.MOVING;
 	}
 	
 	private void initAnimationStates(){
-		idleLeft = new Animation(
-				AssetFactory.instance().getSpriteSheet(EAnimType.IDLE_LEFT),
+		randomAnim = new Animation(
+				AssetFactory.instance().getSpriteSheet(EAnimType.ENEMY_DRUNK),
 				100
 			);
-		idleDown = new Animation(
-				AssetFactory.instance().getSpriteSheet(EAnimType.IDLE_DOWN),
+		alertLeft = new Animation(
+				AssetFactory.instance().getSpriteSheet(EAnimType.ENEMY_ALERT_LEFT),
 				100
 			);
-		idleUp = new Animation(
-				AssetFactory.instance().getSpriteSheet(EAnimType.IDLE_UP),
+		alertRight = new Animation(
+				AssetFactory.instance().getSpriteSheet(EAnimType.ENEMY_ALERT_RIGHT),
 				100
 			);
-		idleRight = new Animation(
-				AssetFactory.instance().getSpriteSheet(EAnimType.IDLE_RIGHT),
+		shootLeft = new Animation(
+				AssetFactory.instance().getSpriteSheet(EAnimType.ENEMY_SHOOT_LEFT),
+				100
+			);
+		shootRight = new Animation(
+				AssetFactory.instance().getSpriteSheet(EAnimType.ENEMY_SHOOT_RIGHT),
 				100
 			);
 		
-		currState = idleLeft;
+		currState = randomAnim;
+		
+		alertImage = AssetFactory.instance().getImage(EImgType.ALERT);
 	}
 		
 	
@@ -108,7 +122,9 @@ public class Enemy extends Entity {
 			g.draw(range);
 			g.drawString(alertLevel+"", position.x, position.y);
 		}
-		
+		if(status == Status.STILL){
+			alertImage.draw(position.x - 20, position.y - 20);
+		}
 	}
 
 	@Override
@@ -129,7 +145,7 @@ public class Enemy extends Entity {
 			}
 			
 			if(twitchInterval >= 3000){
-				setDrunkenSpriteDirection();
+				currState = randomAnim;
 				twitchInterval = 0;
 			}
 			
@@ -154,7 +170,7 @@ public class Enemy extends Entity {
 			}else{
 				alertLevel += delta/2;
 			}
-			
+			setAlertDirection((Player)player);
 			if(alertLevel >= MID_ALERT_LEVEL*2){
 				status = Status.SHOOT;
 			}else if(alertLevel < 0){
@@ -168,7 +184,8 @@ public class Enemy extends Entity {
 			if(!isTargetInRange()){
 				alertLevel = -1;
 			}
-			shoot();
+			setShootingDirection((Player)player);
+			shoot();			
 			if(alertLevel < 0){
 				status = Status.MOVING;
 				reloadInterval = 1000;
@@ -189,22 +206,27 @@ public class Enemy extends Entity {
 		if(reloadInterval > 1000){
 			bullets[Bullet.currBullet].shoot(position, player.getPosition());
 			reloadInterval = 0;
+			Stats.instance().shotAtTimes++;
+			gunShotSound.play();
 		}
 		
 	}
 	
-	private void setDrunkenSpriteDirection(){
-		int direction = (int)(Math.random()*3);		
-		if(direction == 0){
-			currState = idleLeft;
-		}else if(direction == 1){
-			currState = idleRight;
-		}else if(direction == 2){
-			currState = idleUp;
-		}else if(direction == 3){
-			currState = idleDown;
+	private void setAlertDirection(Player target){
+		if(target.position.x > position.x){
+			currState = alertRight;
+		}else{
+			currState = alertLeft;
 		}
 	}
+	
+	private void setShootingDirection(Player target){
+		if(target.position.x > position.x){
+			currState = shootRight;
+		}else{
+			currState = shootLeft;
+		}
+	}	
 	
 	private boolean isTargetInRange(){
 		if(((Player)player).status == Player.Status.HIDING){

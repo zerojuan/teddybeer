@@ -6,5 +6,6 @@ package com.icecream.util;
  *
  */
 public enum ESndType {
-
+	GUNSHOT,
+	BACKGROUND
 }
