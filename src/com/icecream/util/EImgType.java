@@ -10,5 +10,8 @@ package com.icecream.util;
 public enum EImgType {
 	BACKGROUND,
 	PLAYER,
-	BLOCK
+	BLOCK,
+	ALERT,
+	GAME_OVER,
+	BEER_BOX
 }

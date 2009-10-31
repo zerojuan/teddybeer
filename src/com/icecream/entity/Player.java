@@ -27,6 +27,11 @@ public class Player extends Entity{
 	private Animation idleRight;
 	private Animation idleUp;
 	private Animation idleDown;
+	private Animation idleHide;
+	private Animation beerUp;
+	private Animation beerDown;
+	private Animation beerRight;
+	private Animation beerLeft;
 	
 	private Animation currState;
 	
@@ -34,7 +39,9 @@ public class Player extends Entity{
 	
 	private Point respawnPoint;
 	
-	private int SIZE = 18;
+	private int SIZE = 15;
+	
+	private int animationSpeed = 200;
 	
 	public static enum Status{
 		WALKIN_EMPTY,
@@ -81,18 +88,38 @@ public class Player extends Entity{
 	private void initAnimationStates(){
 		idleLeft = new Animation(
 					AssetFactory.instance().getSpriteSheet(EAnimType.IDLE_LEFT),
-					100
+					animationSpeed
 				);
 		idleDown = new Animation(
 				AssetFactory.instance().getSpriteSheet(EAnimType.IDLE_DOWN),
-				100
+				animationSpeed
 			);
 		idleUp = new Animation(
 				AssetFactory.instance().getSpriteSheet(EAnimType.IDLE_UP),
-				100
+				animationSpeed
 			);
 		idleRight = new Animation(
 				AssetFactory.instance().getSpriteSheet(EAnimType.IDLE_RIGHT),
+				animationSpeed
+			);
+		idleHide =  new Animation(
+				AssetFactory.instance().getSpriteSheet(EAnimType.IDLE_HIDE),
+				100
+			);
+		beerUp =  new Animation(
+				AssetFactory.instance().getSpriteSheet(EAnimType.BEER_UP),
+				100
+			);
+		beerLeft =  new Animation(
+				AssetFactory.instance().getSpriteSheet(EAnimType.BEER_LEFT),
+				100
+			);
+		beerRight =  new Animation(
+				AssetFactory.instance().getSpriteSheet(EAnimType.BEER_RIGHT),
+				100
+			);
+		beerDown =  new Animation(
+				AssetFactory.instance().getSpriteSheet(EAnimType.BEER_DOWN),
 				100
 			);
 		
@@ -123,7 +150,18 @@ public class Player extends Entity{
 	 * Called if the player is hit
 	 */
 	public void hurt(){
-		status = Status.DEAD;
+		if(status != Status.HIDING){
+			status = Status.DEAD;
+		}
+		
+	}
+	
+	public boolean isCarrying(){
+		return (status == Status.BEER_WALKING);
+	}
+	
+	public boolean isHiding(){
+		return (status == Status.HIDING);
 	}
 	
 	@Override
@@ -142,7 +180,8 @@ public class Player extends Entity{
 		}
 			
 	}
-
+	
+	
 	@Override
 	public void update(GameContainer container, StateBasedGame game, int delta)
 			throws SlickException {
@@ -153,8 +192,11 @@ public class Player extends Entity{
 		  	GamePlayState gameState = (GamePlayState)(game.getCurrentState());
 		  	if(status != Status.DEAD){
 		  		 if (input.isKeyDown(Input.KEY_UP))	        	 
-		         {
+		         {		  			 
 		             currState = idleUp;
+		             if(status == Status.BEER_WALKING){
+		            	 currState = beerUp;
+		             }
 		             //if (!gameState.collidesWithBlock(x, y - delta * 0.1f))
 		             if (!(gameState.isBlocked(x, y-fdelta) || gameState.isBlocked(x+SIZE-1, y-fdelta)))
 		             {
@@ -166,6 +208,9 @@ public class Player extends Entity{
 		         if (input.isKeyDown(Input.KEY_DOWN))
 		         {
 		             currState = idleDown;
+		             if(status == Status.BEER_WALKING){
+		            	 currState = beerDown;
+		             }
 		             //if (!gameState.collidesWithBlock(x, y + 20 + delta * 0.1f))
 		             if (!(gameState.isBlocked(x, y+SIZE+fdelta) || gameState.isBlocked(x+SIZE-1, y+SIZE+fdelta)))
 		             {
@@ -176,6 +221,9 @@ public class Player extends Entity{
 		         if (input.isKeyDown(Input.KEY_LEFT))
 		         {
 		             currState = idleLeft;
+		             if(status == Status.BEER_WALKING){
+		            	 currState = beerLeft;
+		             }
 		             //if (!gameState.collidesWithBlock(x - fdelta, y))
 		             if (!(gameState.isBlocked(x - fdelta, y) || gameState.isBlocked(x-fdelta, y+SIZE-1)))
 		             {
@@ -186,6 +234,9 @@ public class Player extends Entity{
 		         if (input.isKeyDown(Input.KEY_RIGHT))
 		         {
 		             currState = idleRight;
+		             if(status == Status.BEER_WALKING){
+		            	 currState = beerRight;
+		             }
 		             //if (!gameState.collidesWithBlock(x + 20 + delta * 0.1f, y))
 		             if (!(gameState.isBlocked(x + SIZE + fdelta, y) || gameState.isBlocked(x+SIZE+fdelta, y+SIZE-1)))
 		             {
@@ -195,6 +246,7 @@ public class Player extends Entity{
 		         }
 		         if(input.isKeyDown(Input.KEY_X) && status != Player.Status.BEER_WALKING){
 		        	 status = Player.Status.HIDING;
+		        	 currState = idleHide;
 		         }
 		         
 		         if(isWithinBeerHouse(gameState) && status == Player.Status.WALKIN_EMPTY){
@@ -203,12 +255,25 @@ public class Player extends Entity{
 		         
 		         if(isWithinBearHouse(gameState) && status == Player.Status.BEER_WALKING){
 		        	 status = Player.Status.WALKIN_EMPTY;
-		        	 logger.info("SCORE!");
+		        	 Stats.instance().score++;
+		        	 if(Stats.instance().score >= 5){
+		        		 game.enterState(TeddyBeerGame.GAMEOVERSTATE);
+		        	 }
 		         }
 		         if(position.x != x || position.y != y){
 		        	 if(status == Player.Status.HIDING){
 		        		 status = Player.Status.WALKIN_EMPTY;
 		        	 }
+		        	 if(status == Player.Status.BEER_WALKING){
+		        		 Stats.instance().carryingTime+=delta*.2;
+		        	 }else{
+		        		 Stats.instance().runningTime+=delta*.2; 
+		        	 }
+		        	 
+		         }		
+		         
+		         if(status == Player.Status.HIDING){
+		        	 Stats.instance().hidingTime+=delta;
 		         }
 		         
 		         position.x = x;
@@ -217,6 +282,7 @@ public class Player extends Entity{
 		         boundingBox.setY(position.y);
 		         setTerritory();
 		  	}else{
+		  		Stats.instance().diedTimes++;
 		  		respawn();
 		  		status = Player.Status.WALKIN_EMPTY;
 		  	}
